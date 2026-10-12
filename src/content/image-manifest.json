@@ -1,0 +1,163 @@
+{
+  "images": {
+    "detail-light": {
+      "src": "/media/detail-light.webp",
+      "base": "/media/_r/detail-light",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "62b9632e20a7b9f0"
+    },
+    "detail-wheel": {
+      "src": "/media/detail-wheel.webp",
+      "base": "/media/_r/detail-wheel",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "955b8117718d2a13"
+    },
+    "finale-poster": {
+      "src": "/media/finale-poster.webp",
+      "base": "/media/_r/finale-poster",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "bdff17e1918eca6b"
+    },
+    "finishes/render-orange": {
+      "src": "/media/finishes/render-orange.webp",
+      "base": "/media/_r/finishes/render-orange",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "60e64f84e4c30703"
+    },
+    "finishes/render-titanium": {
+      "src": "/media/finishes/render-titanium.webp",
+      "base": "/media/_r/finishes/render-titanium",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "4c2e06dc987e83e4"
+    },
+    "finishes/study-orange": {
+      "src": "/media/finishes/study-orange.webp",
+      "base": "/media/_r/finishes/study-orange",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "9cac6e90346d4d96"
+    },
+    "finishes/study-titanium": {
+      "src": "/media/finishes/study-titanium.webp",
+      "base": "/media/_r/finishes/study-titanium",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "60d9f47ee4eda81d"
+    },
+    "hero-film": {
+      "src": "/media/hero-film.webp",
+      "base": "/media/_r/hero-film",
+      "width": 1920,
+      "height": 1080,
+      "widths": [
+        640,
+        960,
+        1280,
+        1920,
+        2560
+      ],
+      "hash": "1e4efcfbda791692"
+    },
+    "hero-poster": {
+      "src": "/media/hero-poster.webp",
+      "base": "/media/_r/hero-poster",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "bf89dedd96ae9a37"
+    },
+    "reveal-front": {
+      "src": "/media/reveal-front.webp",
+      "base": "/media/_r/reveal-front",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "79447da90323d2a5"
+    },
+    "reveal-side": {
+      "src": "/media/reveal-side.webp",
+      "base": "/media/_r/reveal-side",
+      "width": 1672,
+      "height": 941,
+      "widths": [
+        640,
+        960,
+        1280,
+        1672,
+        2560
+      ],
+      "hash": "ef7aee6da232058d"
+    }
+  },
+  "og": {
+    "src": "/media/_r/og.jpg",
+    "width": 1200,
+    "height": 630
+  }
+}

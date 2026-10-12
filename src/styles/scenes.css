@@ -1,0 +1,1435 @@
+/*
+  Scene compositions. Base rules describe the touch / reduced-motion flow;
+  the "cine" media query layers the pinned, scroll-driven compositions on top.
+  cine = (min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference)
+*/
+
+/* ───────────── Shared ───────────── */
+
+.scene {
+  position: relative;
+  isolation: isolate;
+}
+
+.media-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Blade wipe: outer layer is skewed, inner layer counter-skews so the photo
+   stays still while the slanted edge travels. Both move with transforms only. */
+.blade-wipe {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -32svh;
+  right: -32svh;
+  overflow: hidden;
+  transform: skewX(-12deg);
+}
+
+.blade-wipe__inner {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 32svh;
+  right: 32svh;
+  transform: skewX(12deg);
+}
+
+.blade-wipe__edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 2;
+  background: linear-gradient(180deg, transparent, var(--color-ignition) 18%, #ffc2a8 50%, var(--color-ignition) 82%, transparent);
+  box-shadow: var(--glow);
+}
+
+.blade-wipe__edge--start {
+  left: 0;
+}
+
+.blade-wipe__edge--end {
+  right: 0;
+}
+
+/* ───────────── 01 · Hero ───────────── */
+
+.hero {
+  height: 100svh;
+  min-height: 36rem;
+  overflow: hidden;
+  background: var(--color-obsidian);
+}
+
+.hero__media,
+.hero__media-inner {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__media-inner :is(img, video) {
+  object-position: 58% 50%;
+}
+
+/* The film's camera travels across the frame: keep it centred on landscape
+   screens; portrait screens show its opening frame, framed on the nose. */
+.hero--film .hero__media-inner :is(img, video) {
+  object-position: 50% 50%;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .hero--film .hero__media-inner img {
+    object-position: 41% 50%;
+  }
+}
+
+.hero__video {
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-cine-out);
+}
+
+.hero__video[data-playing] {
+  opacity: 1;
+}
+
+.hero__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgb(8 9 11 / 0.94) 0%, rgb(8 9 11 / 0.55) 24%, transparent 52%),
+    linear-gradient(to bottom, rgb(8 9 11 / 0.7) 0%, transparent 20%),
+    radial-gradient(130% 90% at 55% 45%, transparent 45%, rgb(8 9 11 / 0.65) 100%);
+}
+
+.hero__sweep {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 22vw;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: linear-gradient(90deg, transparent, rgb(255 110 50 / 0.16) 38%, rgb(255 226 210 / 0.24) 50%, rgb(255 110 50 / 0.16) 62%, transparent);
+  transform: translateX(-30vw) skewX(-14deg);
+}
+
+.hero__exit,
+.hero__curtain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--color-obsidian);
+  opacity: 0;
+}
+
+/* Before hydration the hero waits in the dark. If scripts never arrive the
+   failsafe lifts the curtain on its own. */
+.js .hero:not([data-ready]) .hero__curtain {
+  opacity: 1;
+  animation: failsafe-out 0.9s ease 3s forwards;
+}
+
+.js .hero:not([data-ready]) [data-intro] {
+  opacity: 0;
+  animation: failsafe-in 0.9s ease 3s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .hero:not([data-ready]) .hero__curtain,
+  .js .hero:not([data-ready]) [data-intro] {
+    animation-delay: 0s;
+    animation-duration: 0.01s;
+  }
+}
+
+@keyframes failsafe-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes failsafe-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.hero__content {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 0 var(--gutter) 6.25rem;
+}
+
+@media (min-width: 768px) {
+  .hero__content {
+    padding-bottom: clamp(3rem, 7vh, 5.5rem);
+  }
+}
+
+.hero__row {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: clamp(1rem, 2.4vh, 1.75rem);
+}
+
+.hero__title {
+  font-size: clamp(3.6rem, 19vw, 7rem);
+  line-height: 0.84;
+  letter-spacing: -0.02em;
+}
+
+.hero__title .line {
+  display: block;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem 2rem;
+}
+
+@media (min-width: 1024px) {
+  .hero__row {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+  .hero__actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero__title {
+    font-size: clamp(4rem, 12.3vw, 16rem);
+    white-space: nowrap;
+  }
+  .hero__title .line {
+    display: inline-block;
+    vertical-align: top;
+  }
+  .hero__title .line + .line {
+    margin-left: 0.22em;
+  }
+}
+
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 1.1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  transform: translateX(-50%);
+}
+
+.scroll-cue__track {
+  position: relative;
+  width: 1px;
+  height: 2.5rem;
+  overflow: hidden;
+  background: rgb(184 190 194 / 0.22);
+}
+
+.scroll-cue__track::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 45%;
+  background: var(--color-ignition);
+  box-shadow: var(--glow);
+  animation: cue 2.4s var(--ease-cine-in-out) infinite;
+}
+
+@keyframes cue {
+  0% {
+    transform: translateY(-110%);
+  }
+  60%,
+  100% {
+    transform: translateY(240%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__track::after {
+    animation: none;
+    transform: translateY(60%);
+  }
+}
+
+@media (min-width: 768px) {
+  .scroll-cue {
+    left: auto;
+    right: var(--gutter);
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .scroll-cue__track {
+    height: 4.5rem;
+  }
+}
+
+/* ───────────── 02 · The reveal ───────────── */
+
+/* Below 1024 px: the statement, then the photograph full-bleed. From 1024 px
+   the split composition (car right, statement left) is the layout itself; in
+   `cine` the pinned timeline starts with the car centred and arrives here. */
+.reveal {
+  overflow-x: clip;
+  background: var(--color-obsidian);
+}
+
+.reveal__stage {
+  /* Rig width, and the x of the car's centre in the final frame. The car spans
+     12–88 % of the photograph: ±0.38 rig widths around its centre. */
+  --rig-w: min(128svh, 78%);
+  --car-x: min(97.5% - var(--rig-w) * 0.38, 68%);
+  position: relative;
+  padding: clamp(6rem, 14vw, 9rem) var(--gutter) clamp(4rem, 10vw, 6rem);
+  background: var(--color-obsidian);
+}
+
+.reveal__copy {
+  position: relative;
+  z-index: 2;
+}
+
+.reveal__eyebrow {
+  margin-bottom: 1.25rem;
+}
+
+.reveal__headline {
+  font-size: clamp(3rem, 14vw, 6.5rem);
+}
+
+.reveal__tagline {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: clamp(1.25rem, 2.2vw, 2rem);
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 0.5vw + 0.8rem, 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-titanium);
+}
+
+.reveal__tagline-rule {
+  flex: none;
+  width: 2.5rem;
+  height: 1px;
+  background: var(--color-ignition);
+  box-shadow: 0 0 10px rgb(255 90 31 / 0.6);
+  transform-origin: left center;
+}
+
+/* Full-bleed photograph, clipped sideways only so the glow fades out vertically. */
+.reveal__frame {
+  position: relative;
+  margin: clamp(2.5rem, 7vw, 4rem) calc(var(--gutter) * -1) 0;
+  aspect-ratio: 3 / 2;
+  overflow-x: clip;
+}
+
+/* The rig keeps the photograph's exact 1672:941 ratio, so callouts placed in
+   photo percentages stay on their features at every size and during every move.
+   Phones crop it to 3:2 (the car still fits whole). */
+.reveal__rig {
+  position: absolute;
+  top: 0;
+  left: -9.23%;
+  width: 118.46%;
+  aspect-ratio: 1672 / 941;
+}
+
+/* Spill of the studio's orange light past the photograph's edges. */
+.reveal__glow {
+  position: absolute;
+  inset: -12% -8%;
+  pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 58%, rgb(255 90 31 / 0.08), rgb(255 90 31 / 0.025) 55%, transparent 100%);
+}
+
+/* Feathered on all four sides: the studio dissolves into the section, no edge.
+   Opacity mask only; the pixels of the photograph are untouched. */
+.reveal__photo {
+  --feather-x: linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.25) 3.5%, rgb(0 0 0 / 0.7) 7.5%, #000 11.5%, #000 88.5%, rgb(0 0 0 / 0.7) 92.5%, rgb(0 0 0 / 0.25) 96.5%, transparent 100%);
+  --feather-y: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.12) 3%, rgb(0 0 0 / 0.42) 7%, rgb(0 0 0 / 0.78) 11.5%, #000 16%, #000 72%, rgb(0 0 0 / 0.7) 82%, rgb(0 0 0 / 0.28) 91%, transparent 100%);
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: var(--feather-x), var(--feather-y);
+  mask-image: var(--feather-x), var(--feather-y);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+@media (min-width: 640px) {
+  .reveal__frame {
+    aspect-ratio: 1672 / 941;
+  }
+
+  .reveal__rig {
+    left: 0;
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .reveal__stage {
+    height: min(100svh, 62vw);
+    min-height: 36rem;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Left column ends 3 % short of the car, wherever the car lands. */
+  .reveal__copy {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--gutter);
+    width: calc(var(--car-x) - var(--rig-w) * 0.38 - var(--gutter) - 3%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 3svh;
+    container-type: inline-size;
+  }
+
+  /* "TO FOLLOW." is ~4.6em wide: 20cqi fills ~92 % of the column. */
+  .reveal__headline {
+    font-size: min(9rem, 20cqi);
+  }
+
+  .reveal__frame {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    aspect-ratio: auto;
+    overflow: visible;
+  }
+
+  .reveal__rig {
+    top: 50%;
+    left: calc(var(--car-x) - var(--rig-w) * 0.5);
+    width: var(--rig-w);
+    margin-top: calc(var(--rig-w) * -0.2814);
+  }
+}
+
+@media (min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .reveal__stage {
+    height: 100svh;
+  }
+
+  .reveal__headline .line-inner {
+    transform: translateY(115%);
+  }
+
+  .reveal__eyebrow,
+  .reveal__tagline,
+  .callout {
+    opacity: 0;
+  }
+}
+
+/* Callout: a dot on the feature, a hairline to the label in the dark around the car.
+   The <li> spans the hairline; its top and height are photo percentages. */
+.reveal__callouts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.callout {
+  position: absolute;
+  width: 0;
+}
+
+.callout__stem {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.5px;
+  width: 1px;
+}
+
+.callout--above .callout__stem {
+  background: linear-gradient(to bottom, rgb(245 245 243 / 0.1), rgb(245 245 243 / 0.6));
+  transform-origin: 50% 100%;
+}
+
+.callout--below .callout__stem {
+  background: linear-gradient(to top, rgb(245 245 243 / 0.1), rgb(245 245 243 / 0.6));
+  transform-origin: 50% 0;
+}
+
+.callout__dot {
+  position: absolute;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-ignition);
+  box-shadow: 0 0 0 4px rgb(255 90 31 / 0.18), 0 0 14px 2px rgb(255 90 31 / 0.5);
+}
+
+.callout--above .callout__dot {
+  bottom: -4px;
+}
+
+.callout--below .callout__dot {
+  top: -4px;
+}
+
+.callout__label {
+  position: absolute;
+  font-size: clamp(0.5625rem, 0.3vw + 0.45rem, 0.6875rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-bone);
+  text-shadow: 0 1px 14px rgb(8 9 11 / 0.95), 0 0 2px rgb(8 9 11 / 0.8);
+}
+
+.callout--above .callout__label {
+  bottom: calc(100% + 0.6rem);
+}
+
+.callout--below .callout__label {
+  top: calc(100% + 0.6rem);
+}
+
+.callout--start .callout__label {
+  left: -0.5px;
+}
+
+/* Letter-spacing trails the last glyph: pull it back so the text ends on the hairline. */
+.callout--end .callout__label {
+  right: 0;
+  margin-right: -0.24em;
+}
+
+/* ───────────── 03 · Pure performance ───────────── */
+
+.perf {
+  overflow: hidden;
+  background: var(--color-obsidian);
+  padding: clamp(6rem, 13vw, 10rem) 0 clamp(5rem, 9vw, 7rem);
+}
+
+.perf__dim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--color-obsidian) 0%, var(--color-graphite) 30%, #1b1e21 100%);
+  pointer-events: none;
+}
+
+.perf__head {
+  position: relative;
+  z-index: 2;
+  padding-inline: var(--gutter);
+}
+
+.perf__headline {
+  font-size: clamp(3rem, 12.5vw, 6rem);
+}
+
+.perf__car {
+  position: relative;
+  width: 104%;
+  margin: clamp(1.5rem, 4vw, 3rem) 0 0 -2%;
+  aspect-ratio: 4 / 1;
+}
+
+.perf__car::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -10%;
+  height: 34%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(255 90 31 / 0.16), transparent);
+}
+
+.perf__car svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.perf__line {
+  position: relative;
+  height: 1px;
+  margin-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+}
+
+.perf__line .blade {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+}
+
+.perf__line-head {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ffe2d4;
+  box-shadow: var(--glow);
+  opacity: 0;
+}
+
+.perf__metrics {
+  display: grid;
+  gap: 2.25rem;
+  padding-inline: var(--gutter);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.9rem;
+}
+
+.metric__value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 0.8;
+  color: var(--color-bone);
+}
+
+.metric__num {
+  position: relative;
+  display: inline-block;
+  font-size: clamp(4.25rem, 21vw, 7.5rem);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The final value reserves the width; the animated value sits on top of it. */
+.metric__num-sizer {
+  visibility: hidden;
+}
+
+.metric__num-live {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.metric__unit {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ignition);
+}
+
+.metric__label {
+  padding-top: 0.9rem;
+  border-top: 1px solid rgb(184 190 194 / 0.18);
+}
+
+.perf__note {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding-inline: var(--gutter);
+  max-width: 60ch;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-steel);
+}
+
+@media (min-width: 768px) {
+  .perf__metrics {
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+  }
+  .metric__num {
+    font-size: clamp(4.5rem, 9.4vw, 11.5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .perf__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    align-items: end;
+  }
+  .perf__headline {
+    font-size: clamp(4rem, 6.3vw, 8.75rem);
+  }
+  .perf__car {
+    width: 112%;
+    margin: 0 0 0 -4%;
+  }
+}
+
+/* ───────────── 04 · Designed to defy ───────────── */
+
+.details {
+  background: var(--color-obsidian);
+  padding: clamp(6rem, 14vw, 11rem) 0 clamp(4rem, 10vw, 8rem);
+}
+
+.details__head {
+  padding-inline: var(--gutter);
+  margin-bottom: clamp(4rem, 10vw, 9rem);
+}
+
+.details__headline {
+  font-size: clamp(3rem, 12.5vw, 6rem);
+}
+
+.detail {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  margin-bottom: clamp(5rem, 14vw, 12rem);
+}
+
+.detail__media {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-carbon);
+}
+
+.detail__media .blade-wipe {
+  transform: translateX(0) skewX(-12deg);
+}
+
+.detail__parallax {
+  position: absolute;
+  inset: -8% 0;
+}
+
+/* Static crop into a wider photograph; `scale` composes with GSAP's transform. */
+.detail__zoom {
+  position: absolute;
+  inset: 0;
+  scale: 1.22;
+  transform-origin: 8% 44%;
+}
+
+.detail__zoom img {
+  object-position: 0% 45%;
+}
+
+.detail__copy {
+  padding-inline: var(--gutter);
+}
+
+.detail .detail__title {
+  margin-bottom: 1.25rem;
+  color: var(--color-ignition);
+}
+
+.detail__line {
+  font-size: clamp(2.1rem, 8vw, 4.25rem);
+  line-height: 0.92;
+  max-width: 13ch;
+}
+
+.detail__body {
+  margin-top: 1.5rem;
+  max-width: 36ch;
+  color: var(--color-titanium);
+}
+
+.detail--aero .detail__media {
+  aspect-ratio: 5 / 4;
+  margin-left: var(--gutter);
+}
+
+.detail--light .detail__media {
+  height: 92svh;
+  min-height: 30rem;
+}
+
+.detail--light .detail__copy {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  bottom: clamp(2rem, 6vw, 4.5rem);
+}
+
+.detail--light .detail__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(8 9 11 / 0.92) 0%, rgb(8 9 11 / 0.35) 38%, transparent 60%);
+}
+
+.detail__lid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 50.5%;
+  background: var(--color-obsidian);
+  transform: translateY(0);
+}
+
+.detail__lid--top {
+  top: 0;
+  transform: translateY(-101%);
+}
+
+.detail__lid--bottom {
+  bottom: 0;
+  transform: translateY(101%);
+}
+
+.detail--carbon .detail__media {
+  aspect-ratio: 16 / 11;
+  margin-right: var(--gutter);
+}
+
+@media (min-width: 1024px) {
+  .details__headline {
+    font-size: clamp(4rem, 8vw, 10.5rem);
+  }
+
+  .detail {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1rem, 2vw, 2rem);
+    align-items: end;
+  }
+
+  .detail--aero .detail__copy {
+    grid-column: 1 / span 4;
+    grid-row: 1;
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+
+  .detail--aero .detail__media {
+    grid-column: 5 / -1;
+    grid-row: 1;
+    margin-left: 0;
+    aspect-ratio: 16 / 11;
+  }
+
+  .detail--light .detail__media {
+    grid-column: 1 / -1;
+  }
+
+  .detail--light .detail__copy {
+    grid-column: 1 / span 6;
+  }
+
+  .detail--carbon {
+    align-items: start;
+  }
+
+  .detail--carbon .detail__media {
+    grid-column: 1 / span 8;
+    grid-row: 1;
+    margin-right: 0;
+  }
+
+  .detail--carbon .detail__copy {
+    grid-column: 9 / -1;
+    grid-row: 1;
+    padding-left: 0;
+    padding-top: clamp(2rem, 8vh, 6rem);
+  }
+}
+
+/* ───────────── 05 · The experience ───────────── */
+
+.exp {
+  background:
+    radial-gradient(80% 60% at 50% 62%, #1c2024 0%, #101215 55%, var(--color-obsidian) 100%);
+  padding: clamp(6rem, 13vw, 10rem) 0 clamp(5rem, 10vw, 8rem);
+}
+
+.exp__head {
+  display: grid;
+  gap: 1.5rem;
+  padding-inline: var(--gutter);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.exp__headline {
+  font-size: clamp(3rem, 13vw, 6rem);
+}
+
+.exp__viewer {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-obsidian);
+}
+
+/* Finish photographs share one frame. The incoming one fades in on top while
+   the outgoing one stays fully opaque beneath it, so the background never
+   shows through mid-change. */
+.exp__shots {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+}
+
+.exp__shot {
+  opacity: 0;
+  z-index: 0;
+}
+
+.exp__shot[data-state="previous"] {
+  opacity: 1;
+  z-index: 1;
+}
+
+.exp__shot[data-state="active"] {
+  opacity: 1;
+  z-index: 2;
+  transition: opacity 0.45s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.exp__study {
+  position: absolute;
+  right: clamp(0.75rem, 2vw, 1.25rem);
+  bottom: clamp(0.65rem, 1.8vw, 1.1rem);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-titanium);
+  text-shadow: 0 1px 10px rgb(8 9 11 / 0.9);
+}
+
+.exp__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1s var(--ease-cine-out);
+}
+
+.exp__canvas[data-ready] {
+  opacity: 1;
+}
+
+.exp__panel {
+  display: grid;
+  gap: 2rem;
+  padding: clamp(1.75rem, 4vw, 2.75rem) var(--gutter) 0;
+}
+
+/* Phones: three equal columns, sphere over name, so all fit on one row. */
+.finish-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.finish-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 2.75rem;
+  padding-top: 6px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-steel);
+  transition: color 0.4s var(--ease-cine-out);
+}
+
+@media (min-width: 640px) {
+  .finish-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+  }
+
+  .finish-option {
+    flex-direction: row;
+    padding-top: 0;
+    text-align: left;
+  }
+}
+
+.finish-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+/* Paint sphere: layered gradients from finishes.ts, plus a rim and a contact shadow. */
+.finish-option__swatch {
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background-color: var(--color-obsidian);
+  box-shadow:
+    inset 0 0 0 1px rgb(245 245 243 / 0.14),
+    inset 0 -4px 7px rgb(0 0 0 / 0.45),
+    0 6px 14px -6px rgb(0 0 0 / 0.9);
+  transition: transform 0.45s var(--ease-cine-out);
+}
+
+.finish-option:hover .finish-option__swatch {
+  transform: translateY(-1px);
+}
+
+/* Selected: a fine orange ring with a soft glow. */
+.finish-option__swatch::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 90 31 / 0.9);
+  box-shadow: 0 0 10px rgb(255 90 31 / 0.4), 0 0 24px rgb(255 90 31 / 0.16);
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 0.45s var(--ease-cine-out),
+    transform 0.45s var(--ease-cine-out);
+}
+
+.finish-option:hover,
+.finish-option:has(input:checked) {
+  color: var(--color-bone);
+}
+
+.finish-option:has(input:checked) .finish-option__swatch::after {
+  opacity: 1;
+  transform: none;
+}
+
+.finish-option:has(input:focus-visible) {
+  outline: 1.5px solid var(--color-ignition);
+  outline-offset: 6px;
+}
+
+.finish-option__name {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .finish-option__name {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+  }
+}
+
+/* The three descriptions share one grid cell; only the selected one is shown. */
+.exp__meta {
+  display: grid;
+}
+
+.exp__meta-item {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+
+.exp__meta-item[data-active] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.45s var(--ease-cine-out) 0.08s,
+    transform 0.45s var(--ease-cine-out) 0.08s;
+}
+
+.exp__meta-name {
+  font-size: clamp(2.25rem, 7vw, 4.5rem);
+}
+
+@media (min-width: 1024px) {
+  .exp__head {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+  .exp__headline {
+    font-size: clamp(4rem, 8vw, 10.5rem);
+  }
+  .exp__viewer {
+    margin-inline: var(--gutter);
+  }
+  .exp__panel {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: start;
+  }
+}
+
+/* ───────────── 06 · The next era ───────────── */
+
+.finale {
+  background: var(--color-obsidian);
+}
+
+.finale__stage {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  display: grid;
+  align-content: center;
+  gap: clamp(5rem, 18vh, 10rem);
+  padding: clamp(7rem, 16vh, 10rem) var(--gutter);
+}
+
+.finale__media,
+.finale__media-inner {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.finale__media-inner :is(img, video) {
+  object-position: 45% 50%;
+}
+
+.finale__shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgb(8 9 11 / 0.9) 0%, rgb(8 9 11 / 0.15) 40%, rgb(8 9 11 / 0.5) 100%),
+    radial-gradient(90% 70% at 50% 50%, transparent 40%, rgb(8 9 11 / 0.55) 100%);
+}
+
+.finale__darken {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--color-obsidian);
+  opacity: 0.1;
+}
+
+.finale__a {
+  font-size: clamp(3rem, 12.5vw, 6rem);
+  text-align: center;
+}
+
+.finale__b {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: clamp(1.5rem, 3vh, 2.25rem);
+}
+
+.finale__logo {
+  display: flex;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(5rem, 27vw, 10rem);
+  line-height: 0.8;
+  letter-spacing: 0.04em;
+  color: var(--color-bone);
+}
+
+.finale__logo .line {
+  display: inline-block;
+}
+
+/* The one letter that carries the light blade. */
+.finale__slash {
+  color: var(--color-ignition);
+  text-shadow: 0 0 28px rgb(255 90 31 / 0.45);
+}
+
+.finale__tagline {
+  font-size: clamp(1.15rem, 4.2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  line-height: 1.2;
+}
+
+@media (min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .finale__stage {
+    height: 100svh;
+    display: block;
+    padding: 0;
+  }
+  .finale__a,
+  .finale__b {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .finale__a {
+    font-size: clamp(4rem, 9vw, 11.5rem);
+  }
+  .finale__logo {
+    font-size: clamp(8rem, 21vw, 26rem);
+  }
+  .finale__b > :not(.finale__logo) {
+    opacity: 0;
+  }
+  .finale__a .line-inner,
+  .finale__logo .line-inner {
+    transform: translateY(115%);
+  }
+}
+
+@media (min-width: 768px) {
+  .finale__logo {
+    font-size: clamp(7rem, 21vw, 26rem);
+  }
+}
+
+/* ───────────── Footer ───────────── */
+
+.site-footer {
+  display: grid;
+  gap: 2rem;
+  padding: clamp(2.5rem, 5vw, 3.5rem) var(--gutter) clamp(2rem, 4vw, 2.75rem);
+  border-top: 1px solid rgb(184 190 194 / 0.12);
+  background: var(--color-obsidian);
+}
+
+@media (min-width: 1024px) {
+  .site-footer {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 3rem;
+  }
+}
+
+/* ───────────── Fallback studio (when photography is missing) ───────────── */
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 45% at 50% 78%, rgb(255 90 31 / 0.16), transparent 70%),
+    radial-gradient(80% 60% at 50% 40%, #1a1d21 0%, #0c0d10 60%, var(--color-obsidian) 100%);
+}
+
+.fallback__pillar {
+  position: absolute;
+  top: 0;
+  bottom: 22%;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--color-ignition) 30%, #ffb391 70%, rgb(255 90 31 / 0.2));
+  box-shadow: var(--glow);
+  opacity: 0.75;
+}
+
+.fallback__pillar::after {
+  content: "";
+  position: absolute;
+  inset: 0 -60px;
+  background: radial-gradient(closest-side, rgb(255 90 31 / 0.22), transparent);
+}
+
+.fallback__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background:
+    linear-gradient(180deg, rgb(255 90 31 / 0.2), transparent 3%),
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgb(184 190 194 / 0.06) calc(12.5% - 1px) 12.5%),
+    linear-gradient(180deg, #121417, var(--color-obsidian));
+}
+
+.fallback__silhouette {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 14%;
+  aspect-ratio: 4 / 1;
+  opacity: 0.85;
+}
+
+.hero .fallback__silhouette {
+  bottom: 40%;
+}
+
+.fallback__silhouette svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.fallback--light {
+  background:
+    repeating-linear-gradient(45deg, #0d0f11 0 6px, #15181b 6px 12px),
+    var(--color-obsidian);
+}
+
+.fallback__led {
+  position: absolute;
+  left: 22%;
+  top: 46%;
+  width: 46%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #fff 25%, #fff 85%, transparent);
+  box-shadow: 0 0 18px 4px rgb(255 255 255 / 0.35), 0 0 60px 14px rgb(255 90 31 / 0.18);
+  transform: rotate(9deg);
+}
+
+.fallback--wheel {
+  background:
+    radial-gradient(circle at 50% 55%, rgb(255 90 31 / 0.35) 0 9%, transparent 10%),
+    repeating-radial-gradient(circle at 50% 55%, transparent 0 22px, rgb(184 190 194 / 0.08) 23px 24px),
+    radial-gradient(circle at 50% 55%, #1b1e22 0 34%, var(--color-obsidian) 35%);
+}
+
+/* ───────────── Header, menu, progress rail ───────────── */
+
+.site-header__bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -2.5rem;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgb(8 9 11 / 0.88), rgb(8 9 11 / 0.55) 55%, transparent);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-cine-out);
+}
+
+.site-header[data-scrolled] .site-header__bar::before,
+.site-header[data-open] .site-header__bar::before {
+  opacity: 1;
+}
+
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: calc(var(--header-h) + 2.5rem) var(--gutter) 2rem;
+  background: rgb(8 9 11 / 0.97);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.5s var(--ease-cine-out),
+    visibility 0s linear 0.5s;
+}
+
+.site-header[data-open] .mobile-menu {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s var(--ease-cine-out);
+}
+
+.mobile-menu li {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition:
+    opacity 0.6s var(--ease-cine-out),
+    transform 0.8s var(--ease-cine-out);
+}
+
+.site-header[data-open] .mobile-menu li {
+  opacity: 1;
+  transform: none;
+}
+
+.progress-rail {
+  position: fixed;
+  top: 50%;
+  right: 0.85rem;
+  z-index: 40;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  opacity: 0;
+  translate: 0 -50%;
+  transition: opacity 0.8s var(--ease-cine-out);
+}
+
+@media (min-width: 1024px) {
+  .progress-rail {
+    display: flex;
+  }
+}
+
+.progress-rail[data-visible] {
+  opacity: 1;
+}
+
+.progress-rail__index {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-rail__track {
+  position: relative;
+  width: 1px;
+  height: 22vh;
+  background: rgb(184 190 194 / 0.18);
+}
+
+.progress-rail__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-ignition);
+  box-shadow: var(--glow);
+  transform-origin: top center;
+  transform: scaleY(0);
+}
+
+.progress-rail__title {
+  margin-top: 0.4rem;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+  white-space: nowrap;
+}
